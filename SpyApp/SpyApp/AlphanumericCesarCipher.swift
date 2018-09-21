@@ -14,38 +14,37 @@ struct AlphanumericCesarCipher: Cipher {
         guard let shiftBy = UInt32(secret) else {
             return nil
         }
+        
         var encoded = ""
         
         
-        for character in plaintext {
+        if plaintext.range(of: "[^a-zA-Z0-9]", options: .regularExpression) != nil && plaintext != ""{
+            encoded = "Please enter ALPHANUMERIC input. a-z A-Z 0-9"
+            return encoded
+        }
+        
+        
+        for character in plaintext.uppercased() {
             let unicode = character.unicodeScalars.first!.value
-            var shiftedUnicode = unicode + shiftBy
+            var shiftedUnicode = unicode
             
-            
-            if (unicode >= 97 && unicode <= 122) || (unicode >= 48 && unicode <= 57){
-               
+            for _ in 0..<shiftBy {
                 
-                if (shiftedUnicode > 57 && unicode <= 57){
-                    shiftedUnicode += 39
+                if shiftedUnicode == Unicode.Scalar("Z")?.value {
+                    
+                    shiftedUnicode = Unicode.Scalar("0").value
+                
+                }else if shiftedUnicode == Unicode.Scalar("9")?.value {
+                    
+                    shiftedUnicode = Unicode.Scalar("A").value
+                
+                }else {
+                    shiftedUnicode += 1
                 }
-                if (shiftedUnicode > 122 && unicode <= 122) {
-                    shiftedUnicode -= 75
-                }
-            
             }
             
-//            if (unicode >= 65 && unicode <= 90) || (unicode >= 48 && unicode <= 57){
-//                if (shiftedUnicode > 57 && unicode <= 64){
-//                    shiftedUnicode -= 17
-//                    unicode = 48
-//                }
-//                if (shiftedUnicode > 122 && unicode <= 122) {
-//                    shiftedUnicode -= 75
-//                }
-//            }
             
             let shiftedCharacter = String(UnicodeScalar(UInt8(shiftedUnicode)))
-      
             encoded = encoded + shiftedCharacter
             
             
@@ -56,6 +55,8 @@ struct AlphanumericCesarCipher: Cipher {
         return encoded.uppercased()
     }
     
+    
+    
     func decrypt(_ plaintext: String, secret: String) -> String? {
         guard let shiftBy = UInt32(secret) else {
             return "Must enter secret digit"
@@ -63,10 +64,32 @@ struct AlphanumericCesarCipher: Cipher {
         
         var decrypted = ""
         
-        for character in plaintext {
-            let unicode = character.unicodeScalars.first!.value
-            let UNDOshiftedUnicode = unicode - shiftBy + 1
-            let UNDOshiftedCharacter = String(UnicodeScalar(UInt8(UNDOshiftedUnicode)))
+        if plaintext.range(of: "[^a-zA-Z0-9]", options: .regularExpression) != nil && plaintext != ""{
+            decrypted = "Please enter ALPHANUMERIC input. a-z A-Z 0-9"
+            return decrypted
+        }
+        
+        for character in plaintext.uppercased() {
+            let unicode = character.unicodeScalars.last!.value
+            var UNDOshiftedUnicode = unicode
+                
+            for _ in 0..<shiftBy {
+                if  UNDOshiftedUnicode > Unicode.Scalar("Z").value {
+                    
+                    UNDOshiftedUnicode = Unicode.Scalar("0").value
+                    
+                }else if UNDOshiftedUnicode > Unicode.Scalar("9")!.value && UNDOshiftedUnicode < Unicode.Scalar("0")!.value   {
+                    
+                    UNDOshiftedUnicode = Unicode.Scalar("A").value
+                    
+                }else {
+                    UNDOshiftedUnicode -= 1
+                }
+            }
+            
+            
+            
+            let UNDOshiftedCharacter = String(UnicodeScalar(UInt8(UNDOshiftedUnicode + shiftBy)))
             decrypted = decrypted + UNDOshiftedCharacter
         }
         return decrypted.uppercased()
